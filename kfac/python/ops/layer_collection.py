@@ -625,7 +625,7 @@ class LayerCollection(object):
       params: Variable or tuple of Variables. Parameters for a layer.
       uses: int or float. Number of additional uses for these parameters.
     """
-    params = params if isinstance(params, (tuple, list)) else (params,)
+    params = tuple(item.ref() for item in params) if isinstance(params, (tuple, list)) else (params.ref(),)
     for var in params:
       self._vars_to_uses[var] += uses
 
