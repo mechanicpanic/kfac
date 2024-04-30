@@ -137,6 +137,7 @@ class LayerParametersDict(OrderedDict):
   def __setitem__(self, key, value):
     canonical_key = self._canonicalize_key(key)
     tensors = canonical_key if isinstance(canonical_key, (tuple, list)) else (canonical_key.ref(),)
+    print(tensors)
     key_collisions = self._tensors.intersection(tensors)
     if key_collisions:
       raise ValueError("Key(s) already present: {}".format(key_collisions))
