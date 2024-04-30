@@ -527,9 +527,9 @@ class LayerCollection(object):
         for var in utils.ensure_sequence(params)
     }
     for variable in utils.ensure_sequence(layer_key):
-      if isinstance(variable, tf.Variable):
-        variable = variable.ref()
-      if variable in variable_to_block:
+      # if isinstance(variable, tf.Variable):
+      #   variable = variable.ref()
+      if variable.ref() in variable_to_block:
         prev_key, prev_block = variable_to_block[variable]
         raise ValueError(
             "Attempted to register layer_key {} with block {}, but variable {}"
