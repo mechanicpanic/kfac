@@ -372,6 +372,7 @@ class SubGraph(object):
     while stack:
       nodes = stack.pop()
       for node in nodes:
+        node = node.ref()
         if node in self._members:
           continue
         self._members.add(node)
