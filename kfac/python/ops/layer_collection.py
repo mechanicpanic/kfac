@@ -136,6 +136,7 @@ class LayerParametersDict(OrderedDict):
 
   def __setitem__(self, key, value):
     canonical_key = self._canonicalize_key(key)
+    canonical_key = canonical_key.ref() if isinstance(canonical_key, tf.Variable) else canonical_key
     tensors = (v.ref() for v in canonical_key) if isinstance(canonical_key, (tuple, list)) else (canonical_key.ref(),)
     key_collisions = self._tensors.intersection(tensors)
     if key_collisions:
