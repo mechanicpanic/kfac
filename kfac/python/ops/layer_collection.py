@@ -178,7 +178,7 @@ class LayerParametersDict(OrderedDict):
   def __contains__(self, key):
     canonical_key = self._canonicalize_key(key)
     print("Canonical key:", canonical_key)
-    
+    print(type(canonical_key))
     if isinstance(canonical_key, tf.Variable):
         # Handle a single TensorFlow variable
         print("single case")
