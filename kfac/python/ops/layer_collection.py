@@ -143,7 +143,7 @@ class LayerParametersDict(OrderedDict):
     self._tensors.update(tensors)
     if isinstance(canonical_key, tuple):
       print("Setting a tuple of variables")
-      super(LayerParametersDict, self).__setitem__(canonical_key, value)
+      super(LayerParametersDict, self).__setitem__(tuple(item.ref() for item in canonical_key), value)
     else:
       print("Setting a single variable")
       super(LayerParametersDict, self).__setitem__(canonical_key.ref(), value)
