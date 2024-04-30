@@ -144,6 +144,7 @@ def register_layer(layer_collection, layer, fisher_approx=None, **kwargs):
   # need to be registered and not the nodes from the original built model or
   # any other previous calls, since layers can't be used multiple times
   # (RNN-style) with Keras KFAC.
+  print(layer.inbound_nodes)
   node = layer.inbound_nodes[-1]
   pre_activation_output = node.output_tensors
   if hasattr(layer, 'activation') and layer.activation != activations.linear:
