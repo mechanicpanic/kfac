@@ -71,6 +71,7 @@ from functools import partial
 import math
 
 # Dependency imports
+from numpy import isin
 import six
 import tensorflow.compat.v1 as tf
 
@@ -183,7 +184,11 @@ class LayerParametersDict(OrderedDict):
         # Handle a single TensorFlow variable
         print("single case")
         return super(LayerParametersDict, self).__contains__(canonical_key.ref())
-    elif all(isinstance(item, tf.Variable) for item in canonical_key):
+    
+    elif isinstance(canonical_key, tuple):
+        print("tuple case")
+        return super(LayerParametersDict, self).__contains__(tuple(item.ref() for item in canonical_key))
+    # elif all(isinstance(item, tf.Variable) for item in canonical_key):
         # Handle a tuple of TensorFlow variables
         print("tuple case")
         return super(LayerParametersDict, self).__contains__(tuple(item.ref() for item in canonical_key))
