@@ -59,13 +59,15 @@ def get_parent(node):
     The parent tensor of the node on the computation graph.
   """
   edge = tensorflow_graph_util.expand_inputs(node)
-  if len(edge) != 1:
-    raise ValueError('{} has more than one input op.'.format(node))
-  parent = tensorflow_graph_util.expand_inputs(edge[0])
-  if len(parent) != 1:
-    raise ValueError('{} has more than one parent tensor.'.format(node))
-  return parent[0]
-
+  if edge is not None:
+    if len(edge) != 1:
+      raise ValueError('{} has more than one input op.'.format(node))
+    parent = tensorflow_graph_util.expand_inputs(edge[0])
+    if len(parent) != 1:
+      raise ValueError('{} has more than one parent tensor.'.format(node))
+    return parent[0]
+  else:
+    return None
 
 def serialize_loss(loss):
   """Serialize a valid Keras Kfac loss argument."""

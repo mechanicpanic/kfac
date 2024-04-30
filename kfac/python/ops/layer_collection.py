@@ -134,26 +134,64 @@ class LayerParametersDict(OrderedDict):
     super(LayerParametersDict, self).__init__(*args, **kwargs)
 
   def __setitem__(self, key, value):
-    key = self._canonicalize_key(key)
-    tensors = key if isinstance(key, (tuple, list)) else (key,)
+    canonical_key = self._canonicalize_key(key)
+    tensors = canonical_key if isinstance(canonical_key, (tuple, list)) else (canonical_key,)
     key_collisions = self._tensors.intersection(tensors)
     if key_collisions:
       raise ValueError("Key(s) already present: {}".format(key_collisions))
     self._tensors.update(tensors)
-    super(LayerParametersDict, self).__setitem__(key, value)
+    super(LayerParametersDict, self).__setitem__(canonical_key, value)
 
   def __delitem__(self, key):
-    key = self._canonicalize_key(key)
+    canonical_key = self._canonicalize_key(key)
     self._tensors.remove(key)
-    super(LayerParametersDict, self).__delitem__(key)
-
+    canonical_key = self._canonicalize_key(key)
+    print("Canonical key:", canonical_key)
+    
+    if isinstance(canonical_key, tf.Variable):
+        # Handle a single TensorFlow variable
+        return super(LayerParametersDict, self).__delitem__(canonical_key.ref())
+    elif all(isinstance(item, tf.Variable) for item in canonical_key):
+        # Handle a tuple of TensorFlow variables
+        return super(LayerParametersDict, self).__delitem__(tuple(item.ref() for item in canonical_key))
+    else:
+        # Fallback for other cases
+        return super(LayerParametersDict, self).__delitem__(canonical_key)
+    
   def __getitem__(self, key):
-    key = self._canonicalize_key(key)
-    return super(LayerParametersDict, self).__getitem__(key)
-
+    canonical_key = self._canonicalize_key(key)
+    print("Canonical key:", canonical_key)
+    print(isinstance(canonical_key), tuple)
+    if isinstance(canonical_key, tf.Variable):
+        # Handle a single TensorFlow variable
+        print("Getting a single variable")
+        return super(LayerParametersDict, self).__getitem__(canonical_key.ref())
+    elif all(isinstance(item, tf.Variable) for item in canonical_key):
+        # Handle a tuple of TensorFlow variables
+        print("Getting a tuple of variables")
+        return super(LayerParametersDict, self).__getitem__(tuple(item.ref() for item in canonical_key))
+    else:
+        # Fallback for other cases
+        print("Getting a fallback")
+        return super(LayerParametersDict, self).__getitem__(canonical_key)
+      
   def __contains__(self, key):
-    key = self._canonicalize_key(key)
-    return super(LayerParametersDict, self).__contains__(key)
+    canonical_key = self._canonicalize_key(key)
+    print("Canonical key:", canonical_key)
+    
+    if isinstance(canonical_key, tf.Variable):
+        # Handle a single TensorFlow variable
+        print("single case")
+        return super(LayerParametersDict, self).__contains__(canonical_key.ref())
+    elif all(isinstance(item, tf.Variable) for item in canonical_key):
+        # Handle a tuple of TensorFlow variables
+        print("tuple case")
+        return super(LayerParametersDict, self).__contains__(tuple(item.ref() for item in canonical_key))
+    else:
+        # Fallback for other cases
+        print("fallback case")
+        return super(LayerParametersDict, self).__contains__(canonical_key)
+
 
   def _canonicalize_key(self, key):
     if isinstance(key, (list, tuple)):
@@ -723,7 +761,9 @@ class LayerCollection(object):
 
   def _get_linked_approx(self, params):
     """If params were linked, return their specified approximation."""
-    params_set = frozenset(utils.ensure_sequence(params))
+    # params_set = frozenset(utils.ensure_sequence(params))
+    params_set = frozenset([var.ref() for var in utils.ensure_sequence(params)])
+
     if params_set in self.linked_parameters:
       return self.linked_parameters[params_set]
     else:
